@@ -16,6 +16,45 @@ document.querySelectorAll('[data-year]').forEach((year) => {
   year.textContent = new Date().getFullYear();
 });
 
+const copyToClipboard = async (text) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const helper = document.createElement('textarea');
+  helper.value = text;
+  helper.setAttribute('readonly', '');
+  helper.style.position = 'fixed';
+  helper.style.opacity = '0';
+  document.body.appendChild(helper);
+  helper.select();
+  document.execCommand('copy');
+  helper.remove();
+};
+
+document.querySelectorAll('[data-copy]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const status = button.querySelector('[data-copy-status]');
+    const originalStatus = status?.textContent || '复制';
+
+    try {
+      await copyToClipboard(button.dataset.copy);
+      button.classList.add('is-copied');
+      if (status) status.textContent = '已复制';
+      window.setTimeout(() => {
+        button.classList.remove('is-copied');
+        if (status) status.textContent = originalStatus;
+      }, 1600);
+    } catch (error) {
+      if (status) status.textContent = '请手动复制';
+      window.setTimeout(() => {
+        if (status) status.textContent = originalStatus;
+      }, 1800);
+    }
+  });
+});
+
 const homeCarousel = document.querySelector('[data-home-carousel]');
 
 if (homeCarousel) {
